@@ -5,6 +5,7 @@ const alertasService = require('../services/alertas.service');
 
 // Obtener todos los proyectos con información del cliente
 router.get('/', (req, res) => {
+  alertasService.actualizarProyectosVencidos();
   try {
     const { estado, cliente_id } = req.query;
     

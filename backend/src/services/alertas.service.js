@@ -72,8 +72,24 @@ const enviarAlerta = async (proyecto) => {
   return true;
 };
 
+// Actualizar estado de proyectos vencidos
+const actualizarProyectosVencidos = () => {
+  const hoy = new Date();
+  const fechaHoy = hoy.toISOString().split('T')[0]; // YYYY-MM-DD
+  const result = db.prepare(`
+    UPDATE proyectos 
+    SET estado = 'Retrasado'
+    WHERE estado NOT IN ('Completado', 'Retrasado')
+    AND date(fecha_vencimiento) < date(?)
+  `).run(fechaHoy);
+  
+  return result.changes;
+};
+
 // Verificar y enviar alertas de proyectos próximos a vencer
 const verificarProyectosProximosAVencer = async () => {
+  actualizarProyectosVencidos();
+
   const proyectos = obtenerProyectosProximosAVencer();
   
   if (proyectos.length === 0) {
@@ -93,5 +109,6 @@ const verificarProyectosProximosAVencer = async () => {
 module.exports = {
   obtenerProyectosProximosAVencer,
   enviarAlerta,
-  verificarProyectosProximosAVencer
+  verificarProyectosProximosAVencer,
+  actualizarProyectosVencidos
 };
